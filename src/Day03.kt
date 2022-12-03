@@ -13,9 +13,9 @@ fun main() {
     fun part2(input: List<String>): Int {
         return input.chunked(3)
             .map { group ->
-                val first = group[0].split("").distinct().drop(1)
-                val second = group[1].split("").distinct().drop(1)
-                val third = group[2].split("").distinct().drop(1)
+                val first = group[0].asIndividualGroupChars()
+                val second = group[1].asIndividualGroupChars()
+                val third = group[2].asIndividualGroupChars()
                 first.intersect(second.toSet()).intersect(third.toSet()).first()
             }.sumOf {
                 letterValue(it)
@@ -32,7 +32,7 @@ fun main() {
     println(part2(input))
 }
 
-fun letterValue(letter: String): Int {
+private fun letterValue(letter: String): Int {
     val letterAsChar = letter.single()
     return if (letterAsChar.isUpperCase()) {
         letterAsChar - 'A' + 27
@@ -40,3 +40,5 @@ fun letterValue(letter: String): Int {
         letterAsChar - 'a' + 1
     }
 }
+
+private fun String.asIndividualGroupChars() = split("").distinct().drop(1)

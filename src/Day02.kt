@@ -26,7 +26,7 @@ fun main() {
 }
 
 
-fun myRoundScore(opponentChoice: String, myChoice: String): Int {
+private fun myRoundScore(opponentChoice: String, myChoice: String): Int {
     return when {
         opponentChoice == "A" && myChoice == "X" -> 4
         opponentChoice == "A" && myChoice == "Y" -> 8
@@ -41,7 +41,7 @@ fun myRoundScore(opponentChoice: String, myChoice: String): Int {
     }
 }
 
-fun myRoundScore2(opponentChoice: String, myChoice: String): Int {
+private fun myRoundScore2(opponentChoice: String, myChoice: String): Int {
     return when {
         opponentChoice == "A" && myChoice == "X" -> 3
         opponentChoice == "A" && myChoice == "Y" -> 4
