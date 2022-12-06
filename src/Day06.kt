@@ -28,9 +28,9 @@ private fun count(input: String, startOfPacketMarkerCount: Int): Int {
     return count + 1
 }
 
-private fun hasDuplicate(letters: String, until: Int): Boolean {
+private fun hasDuplicate(letters: String, untilIndex: Int): Boolean {
     val sortedChars = letters.toCharArray().sorted()
-    for (i in 0 until until) {
+    for (i in 0 until untilIndex) {
         if (sortedChars[i] == sortedChars[i + 1]) {
             return true
         }
