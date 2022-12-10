@@ -28,21 +28,21 @@ fun main() {
     }
 
     fun part2(input: List<String>) {
-        val rows = mutableListOf<String>()
         var cycle = 1
         var x = 1
-        fun draw() {
-            if (cycle - 1 >= x - 1 && cycle - 1 <= x + 1) {
-                rows.add("#")
+        fun charToDraw(): String {
+            return if (cycle - 1 >= x - 1 && cycle - 1 <= x + 1) {
+                "#"
             } else {
-                rows.add(".")
+                "."
             }
         }
-        input.forEach { line ->
+        input.flatMap { line ->
+            val charsToDraw = mutableListOf<String>()
             if (cycle == 41) {
                 cycle = 1
             }
-            draw()
+            charsToDraw.add(charToDraw())
             val instruction = line.substring(0, 4)
             when (instruction) {
                 "addx" -> {
@@ -51,14 +51,14 @@ fun main() {
                     if (cycle == 41) {
                         cycle = 1
                     }
-                    draw()
+                    charsToDraw.add(charToDraw())
                     x += number.toInt()
                     cycle++
                 }
                 "noop" -> cycle++
             }
-        }
-        rows.chunked(40).forEach { println(it.joinToString("")) }
+            charsToDraw
+        }.chunked(40).forEach { println(it.joinToString("")) }
     }
 
     // test if implementation meets criteria from the description, like:
