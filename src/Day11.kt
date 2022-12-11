@@ -26,7 +26,7 @@ fun main() {
     println(part2(input))
 }
 
-private fun buildMonkeys(input: List<String>) =
+private fun buildMonkeys(input: List<String>): Array<Monkey> =
     input.filterNot { it == "" }
         .chunked(6)
         .map { buildMonkey(it) }
@@ -34,41 +34,50 @@ private fun buildMonkeys(input: List<String>) =
 
 private fun buildMonkey(lines: List<String>): Monkey {
     val (operand1, operator, operand2) = lines[2].split(" = ")[1].split(" ")
-    val op1 = if (operand1 == "old") { old: Long -> old } else { _ -> operand1.toLong() }
-    val op2 = if (operand2 == "old") { old: Long -> old } else { _ -> operand2.toLong() }
-    val op = operator(operator)
+    val op1Function = operandFunction(operand1)
+    val op2Function = operandFunction(operand2)
+    val op = operatorFunction(operator)
     return Monkey(
-        id = lines[0].split(" ")[1].dropLast(1).toInt(),
-        startingItems = lines[1].split(":")[1]
+        items = lines[1].split(":")[1]
             .filterNot { it.isWhitespace() }
             .split(",")
             .map { it.toLong() }
             .toMutableList(),
-        operation = { old: Long -> op(op1(old), op2(old)) },
-        testDivisibleBy = lines[3].split(" ").last().toInt(),
-        monkeyIfTrue = lines[4].split(" ").last().toInt(),
-        monkeyIfFalse = lines[5].split(" ").last().toInt()
+        operation = { old: Long -> op(op1Function(old), op2Function(old)) },
+        testDivisibleBy = lines[3].getLastCharAsInt(),
+        monkeyIfTrue = lines[4].getLastCharAsInt(),
+        monkeyIfFalse = lines[5].getLastCharAsInt(),
     )
+}
+
+private fun String.getLastCharAsInt() = split(" ").last().toInt()
+
+private fun operandFunction(operand: String) =
+    if (operand == "old") { old: Long -> old } else { _ -> operand.toLong() }
+
+private fun operatorFunction(operatorString: String): (Long, Long) -> Long = when (operatorString) {
+    "*" -> { op1: Long, op2: Long -> op1 * op2 }
+    "+" -> { op1: Long, op2: Long -> op1 + op2 }
+    else -> throw UnsupportedOperationException("Unsupported operation = $operatorString")
 }
 
 private fun run(
     rounds: Int,
     monkeys: Array<Monkey>,
-    worryLevelCalc: (monkey: Monkey, currentItemWorryLevel: Long) -> Long,
+    calcNewWorryLevel: (monkey: Monkey, itemWorryLevel: Long) -> Long,
 ): Long {
     for (round in 1..rounds) {
         monkeys.forEach { monkey ->
-            monkey.startingItems.forEach { itemWorryLevel ->
+            monkey.items.forEach { itemWorryLevel ->
                 monkey.itemsInspected++
-                val newWorryLevel = worryLevelCalc(monkey, itemWorryLevel)
-                val b = newWorryLevel % monkey.testDivisibleBy == 0L
-                val monkeyToThrowTo = when (b) {
+                val newWorryLevel = calcNewWorryLevel(monkey, itemWorryLevel)
+                val monkeyToThrowTo = when (newWorryLevel % monkey.testDivisibleBy == 0L) {
                     true -> monkey.monkeyIfTrue
                     false -> monkey.monkeyIfFalse
                 }
-                monkeys[monkeyToThrowTo].startingItems.add(newWorryLevel)
+                monkeys[monkeyToThrowTo].items.add(newWorryLevel)
             }
-            monkey.startingItems.clear()
+            monkey.items.clear()
         }
     }
     return monkeys.sortedByDescending { it.itemsInspected }
@@ -78,18 +87,11 @@ private fun run(
 }
 
 data class Monkey(
-    val id: Int,
-    val startingItems: MutableList<Long>,
+    val items: MutableList<Long>,
     val operation: (old: Long) -> Long,
     val testDivisibleBy: Int,
     val monkeyIfTrue: Int,
     val monkeyIfFalse: Int,
 ) {
     var itemsInspected: Long = 0
-}
-
-private fun operator(operatorString: String): (Long, Long) -> Long = when (operatorString) {
-    "*" -> { op1: Long, op2: Long -> op1 * op2 }
-    "+" -> { op1: Long, op2: Long -> op1 + op2 }
-    else -> throw UnsupportedOperationException("Unsupported operation = $operatorString")
 }
