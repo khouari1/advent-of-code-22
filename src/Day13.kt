@@ -4,11 +4,7 @@ fun main() {
     fun part1(input: List<String>): Int {
         val packetPairs = input.split { it.isBlank() }.map { it[0] to it[1] }
         return packetPairs.mapIndexed { index, (packet1, packet2) ->
-            val packet1List = mutableListOf<Any>()
-            parseToList(packet1, packet1List)
-            val packet2List = mutableListOf<Any>()
-            parseToList(packet2, packet2List)
-
+            val (packet1List, packet2List) = parseToLists(packet1, packet2)
             if (compareLists(packet1List, packet2List) <= 0) {
                 index + 1
             } else {
@@ -17,16 +13,33 @@ fun main() {
         }.sum()
     }
 
-    fun part2(input: List<String>): Int = 0
+    fun part2(input: List<String>): Int {
+        val bonusPackets = listOf("[[2]]", "[[6]]")
+        val packetPairs = input.filter { it.isNotBlank() } + bonusPackets
+
+        val sortedPackets = packetPairs.sortedWith { packet1, packet2 ->
+            val (packet1List, packet2List) = parseToLists(packet1, packet2)
+            val compareResult = compareLists(packet1List, packet2List)
+            when {
+                compareResult < 0 -> -1
+                compareResult > 0 -> 1
+                else -> 0
+            }
+        }
+
+        val firstDividerPacketIndex = sortedPackets.indexOf("[[2]]") + 1
+        val secondDividerPacketIndex = sortedPackets.indexOf("[[6]]") + 1
+        return firstDividerPacketIndex * secondDividerPacketIndex
+    }
 
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day13_test")
     check(part1(testInput) == 13)
-//    check(part2(testInput) == 29)
+    check(part2(testInput) == 140)
 
     val input = readInput("Day13")
     println(part1(input))
-//    println(part2(input))
+    println(part2(input))
 }
 
 private fun <T> List<T>.split(predicate: (T) -> Boolean): List<List<T>> =
@@ -38,6 +51,14 @@ private fun <T> List<T>.split(predicate: (T) -> Boolean): List<List<T>> =
         }
         acc
     }.filterNot { it.isEmpty() }
+
+private fun parseToLists(packet1: String, packet2: String): Pair<List<Any>, List<Any>> {
+    val packet1List = mutableListOf<Any>()
+    parseToList(packet1, packet1List)
+    val packet2List = mutableListOf<Any>()
+    parseToList(packet2, packet2List)
+    return packet1List to packet2List
+}
 
 private fun parseToList(value: String, list: MutableList<Any>): Int {
     var newTotalIndex = 0
