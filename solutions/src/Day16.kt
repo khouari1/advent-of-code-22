@@ -56,7 +56,7 @@ private fun getTotalPressureForAllPaths(input: List<String>, totalMinutes: Int):
     val valvesById = valvesById(input)
     val valveIds = valvesById.keys
 
-    // DFS to find distance between each node
+    // BFS to find distance between each node
     valveIds.forEach { valveId ->
         val leadToValves = mutableMapOf<String, Int>()
         valveDistanceMatrix[valveId] = leadToValves
@@ -81,6 +81,7 @@ private fun getTotalPressureForAllPaths(input: List<String>, totalMinutes: Int):
     val nonZeroFlowRateValvesById = valveIds.map { valvesById[it]!! }.filter { it.flowRate != 0 }.associateBy { it.id }
 
     val allPaths = mutableListOf<Pair<List<String>, Int>>()
+    // Recursive DFS to find total pressure for all paths
     getTotalPressureForAllPaths(
         currentNode = "AA",
         valvesToVisit = nonZeroFlowRateValvesById.keys,
@@ -125,7 +126,7 @@ private fun getTotalPressureForAllPaths(
                 currentNode = otherValve,
                 valvesToVisit = otherValves,
                 valvesById = valvesById,
-                matrix =matrix,
+                matrix = matrix,
                 minute = newMinute,
                 total = newTotal,
                 allPaths = allPaths,
